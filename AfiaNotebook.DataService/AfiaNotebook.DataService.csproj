@@ -15,4 +15,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AfiaNotebook.Entities\AfiaNotebook.Entities.csproj" />
+  </ItemGroup>
+
 </Project>
