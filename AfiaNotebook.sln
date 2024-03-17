@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34511.84
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AfiaNotebook.Api", "AfiaNotebook.Api\AfiaNotebook.Api.csproj", "{AB6E91D5-E786-4E00-90B6-EF56401D94A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AfiaNotebook.Api", "AfiaNotebook.Api\AfiaNotebook.Api.csproj", "{AB6E91D5-E786-4E00-90B6-EF56401D94A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AfiaNotebook.DataService", "AfiaNotebook.DataService\AfiaNotebook.DataService.csproj", "{C3AD7108-338B-4C71-9D2D-A7CA68ADF67B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AfiaNotebook.DataService", "AfiaNotebook.DataService\AfiaNotebook.DataService.csproj", "{C3AD7108-338B-4C71-9D2D-A7CA68ADF67B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AfiaNotebook.Entities", "AfiaNotebook.Entities\AfiaNotebook.Entities.csproj", "{388922A1-8002-477D-86FF-FCE6088DD1B1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{C3AD7108-338B-4C71-9D2D-A7CA68ADF67B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C3AD7108-338B-4C71-9D2D-A7CA68ADF67B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C3AD7108-338B-4C71-9D2D-A7CA68ADF67B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{388922A1-8002-477D-86FF-FCE6088DD1B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{388922A1-8002-477D-86FF-FCE6088DD1B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{388922A1-8002-477D-86FF-FCE6088DD1B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{388922A1-8002-477D-86FF-FCE6088DD1B1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
