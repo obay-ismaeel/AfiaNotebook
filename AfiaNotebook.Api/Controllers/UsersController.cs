@@ -1,4 +1,5 @@
 ﻿using AfiaNotebook.DataService.Data;
+using AfiaNotebook.DataService.IConfiguration;
 using AfiaNotebook.Entities.DbSet;
 using AfiaNotebook.Entities.Dtos.Incoming;
 using Microsoft.AspNetCore.Http;
@@ -7,17 +8,17 @@ using Microsoft.AspNetCore.Mvc;
 namespace AfiaNotebook.Api.Controllers;
 [Route("api/[controller]")]
 [ApiController]
-public class UsersController(AppDbContext _context) : ControllerBase
+public class UsersController(IUnitOfWork _unitOfWork) : ControllerBase
 {
     [HttpGet]
-    public IActionResult GetUsers()
+    public async Task<IActionResult> GetUsers()
     {
-        var users = _context.Users.Where(u => u.Status == 1).ToList();
+        var users = await _unitOfWork.Users.GetAll();
         return Ok(users);
     }
 
     [HttpPost]
-    public IActionResult AddUser(UserDto user)
+    public async Task<IActionResult> AddUser(UserDto user)
     {
         var _user = new User()
         {
@@ -29,20 +30,20 @@ public class UsersController(AppDbContext _context) : ControllerBase
             DateOfBirth = Convert.ToDateTime(user.DateOfBirth),
             Status = 1
         };
-        _context.Users.Add(_user);
-        _context.SaveChanges();
+        await _unitOfWork.Users.Add(_user);
+        await _unitOfWork.CompleteAsync();
 
-        return Ok("added successfully"); //return 201
+        return CreatedAtAction(nameof(GetUser), new { id = _user.Id } , user); 
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetUser(Guid id)
+    public async Task<IActionResult> GetUser(Guid id)
     {
-        var user = _context.Users.Find(id);
-        
+        var user = await _unitOfWork.Users.GetById(id);
+
         if (user is null)
             return NotFound();
-        
+
         return Ok(user);
     }
 }
