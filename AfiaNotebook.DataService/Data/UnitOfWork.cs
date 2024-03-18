@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace AfiaNotebook.DataService.Data;
-internal class UnitOfWork : IUnitOfWork, IDisposable
+public class UnitOfWork : IUnitOfWork, IDisposable
 {
     private readonly AppDbContext _context;
     private readonly ILogger _logger;
