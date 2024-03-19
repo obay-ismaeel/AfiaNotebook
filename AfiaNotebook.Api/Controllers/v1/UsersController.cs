@@ -2,14 +2,17 @@
 using AfiaNotebook.DataService.IConfiguration;
 using AfiaNotebook.Entities.DbSet;
 using AfiaNotebook.Entities.Dtos.Incoming;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AfiaNotebook.Api.Controllers;
-[Route("api/[controller]")]
-[ApiController]
-public class UsersController(IUnitOfWork _unitOfWork) : ControllerBase
+namespace AfiaNotebook.Api.Controllers.v1;
+public class UsersController : BaseController
 {
+    public UsersController(IUnitOfWork unitOfWork) : base(unitOfWork)
+    {
+    }
+
     [HttpGet]
     public async Task<IActionResult> GetUsers()
     {
@@ -33,7 +36,7 @@ public class UsersController(IUnitOfWork _unitOfWork) : ControllerBase
         await _unitOfWork.Users.Add(_user);
         await _unitOfWork.CompleteAsync();
 
-        return CreatedAtAction(nameof(GetUser), new { id = _user.Id } , user); 
+        return CreatedAtAction(nameof(GetUser), new { id = _user.Id }, user);
     }
 
     [HttpGet("{id}")]

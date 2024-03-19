@@ -1,5 +1,6 @@
 using AfiaNotebook.DataService.Data;
 using AfiaNotebook.DataService.IConfiguration;
+using Asp.Versioning;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,20 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+builder.Services.AddApiVersioning(options =>
+{
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.DefaultApiVersion = ApiVersion.Default;  //new ApiVersion(1, 0);
+    options.ReportApiVersions = true;
+    options.ApiVersionReader = new UrlSegmentApiVersionReader();
+})
+.AddMvc()
+.AddApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'V";
+    options.SubstituteApiVersionInUrl = true;
+});
 
 var app = builder.Build();
 
