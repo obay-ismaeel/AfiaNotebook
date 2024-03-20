@@ -24,7 +24,7 @@ public class AccountsController : BaseController
         _jwtOptions = optionsMonitor.CurrentValue;
     }
 
-    [HttpPost("Register")]
+    [HttpPost("register")]
     public async Task<IActionResult> Register(UserRegisterationRequestDto registerationDto)
     {
         if (!ModelState.IsValid)
@@ -88,6 +88,58 @@ public class AccountsController : BaseController
         var token = GenerateJwtToken(newUser);
 
         return Ok(new UserRegisterationResponseDto
+        {
+            Success = true,
+            Token = token
+        });
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login(UserLoginRequestDto loginDto) 
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new UserLoginResponseDto
+            {
+                Success = false,
+                Errors = new List<string>()
+                {
+                    "Invalid Payload"
+                }
+            });
+        }
+
+        var user = await _userManager.FindByEmailAsync(loginDto.Email);
+
+        if (user is null)
+        {
+            return BadRequest(new UserLoginResponseDto
+            {
+                Success = false,
+                Errors = new List<string>()
+                {
+                    "Invalid authentication request"
+                }
+            });
+        }
+
+        var isValid = await _userManager.CheckPasswordAsync(user, loginDto.Password);
+
+        if (!isValid)
+        {
+            return BadRequest(new UserLoginResponseDto
+            {
+                Success = false,
+                Errors = new List<string>()
+                {
+                    "Invalid password!"
+                }
+            });
+        }
+
+        var token = GenerateJwtToken(user);
+
+        return Ok(new UserLoginResponseDto
         {
             Success = true,
             Token = token
