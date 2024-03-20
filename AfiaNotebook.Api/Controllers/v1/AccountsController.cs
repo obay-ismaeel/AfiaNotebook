@@ -1,4 +1,5 @@
 ﻿using AfiaNotebook.Authentication.Configuration.Models;
+using AfiaNotebook.Authentication.Models.Dtos.Generic;
 using AfiaNotebook.Authentication.Models.Dtos.Incoming;
 using AfiaNotebook.Authentication.Models.Dtos.Outgoing;
 using AfiaNotebook.DataService.IConfiguration;
@@ -18,10 +19,12 @@ public class AccountsController : BaseController
 {
     private readonly UserManager<IdentityUser> _userManager;
     private readonly JwtOptions _jwtOptions;
-    public AccountsController(IUnitOfWork unitOfWork, UserManager<IdentityUser> userManager, IOptionsMonitor<JwtOptions> optionsMonitor) : base(unitOfWork)
+    private readonly TokenValidationParameters _tokenValidationParameters;
+    public AccountsController(IUnitOfWork unitOfWork, UserManager<IdentityUser> userManager, IOptionsMonitor<JwtOptions> optionsMonitor, TokenValidationParameters tokenValidationParameters) : base(unitOfWork)
     {
         _userManager = userManager;
         _jwtOptions = optionsMonitor.CurrentValue;
+        _tokenValidationParameters = tokenValidationParameters;
     }
 
     [HttpPost("register")]
@@ -85,12 +88,13 @@ public class AccountsController : BaseController
         await _unitOfWork.Users.Add(_user);
         await _unitOfWork.CompleteAsync();
 
-        var token = GenerateJwtToken(newUser);
+        var tokens = await GenerateJwtAndRefreshTokens(newUser);
 
         return Ok(new UserRegisterationResponseDto
         {
             Success = true,
-            Token = token
+            JwtToken = tokens.JwtToken,
+            RefreshToken = tokens.RefreshToken
         });
     }
 
@@ -137,16 +141,17 @@ public class AccountsController : BaseController
             });
         }
 
-        var token = GenerateJwtToken(user);
+        var tokens = await GenerateJwtAndRefreshTokens(user);
 
         return Ok(new UserLoginResponseDto
         {
             Success = true,
-            Token = token
+            JwtToken = tokens.JwtToken,
+            RefreshToken = tokens.RefreshToken
         });
     }
 
-    private string GenerateJwtToken(IdentityUser user)
+    private async Task<TokenData> GenerateJwtAndRefreshTokens(IdentityUser user)
     {
         var handler = new JwtSecurityTokenHandler();
 
@@ -159,17 +164,38 @@ public class AccountsController : BaseController
                 new Claim("Id", user.Id),
                 new Claim(JwtRegisteredClaimNames.Sub, user.Email), // unique id
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // used by the refresh token
             }),
-            Expires = DateTime.UtcNow.AddMinutes(20),
+            Expires = DateTime.UtcNow.Add(_jwtOptions.ExpiryTimeFrame),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };
 
         var securityToken = handler.CreateToken(descriptor);
 
-        var token = handler.WriteToken(securityToken);
+        var jwtToken = handler.WriteToken(securityToken);
 
-        return token;
+        //generate the refresh token
+        var refreshToken = new RefreshToken
+        {
+            Token = $"{GenerateRandomString(25)}_{Guid.NewGuid()}",
+            UserId = user.Id,
+            IsRevoked = false,
+            IsUsed = false,
+            JwtId = securityToken.Id,
+            ExpiryDate = DateTime.UtcNow.AddMonths(6),
+        };
+
+        await _unitOfWork.RefreshTokens.Add(refreshToken);
+        await _unitOfWork.CompleteAsync();
+
+        return new TokenData { JwtToken = jwtToken, RefreshToken = refreshToken.Token };
     }
-    
+
+    private string GenerateRandomString(int length)
+    {
+        var random = new Random();
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+
+        return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(36)]).ToArray());
+    }
 }
