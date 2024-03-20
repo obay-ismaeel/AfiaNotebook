@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AfiaNotebook.Authentication\AfiaNotebook.Authentication.csproj" />
     <ProjectReference Include="..\AfiaNotebook.DataService\AfiaNotebook.DataService.csproj" />
   </ItemGroup>
 

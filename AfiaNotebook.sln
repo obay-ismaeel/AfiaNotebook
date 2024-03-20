@@ -7,7 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AfiaNotebook.Api", "AfiaNot
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AfiaNotebook.DataService", "AfiaNotebook.DataService\AfiaNotebook.DataService.csproj", "{C3AD7108-338B-4C71-9D2D-A7CA68ADF67B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AfiaNotebook.Entities", "AfiaNotebook.Entities\AfiaNotebook.Entities.csproj", "{388922A1-8002-477D-86FF-FCE6088DD1B1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AfiaNotebook.Entities", "AfiaNotebook.Entities\AfiaNotebook.Entities.csproj", "{388922A1-8002-477D-86FF-FCE6088DD1B1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AfiaNotebook.Authentication", "AfiaNotebook.Authentication\AfiaNotebook.Authentication.csproj", "{CF45B638-ED12-45A4-8B82-92D12A2A1558}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{388922A1-8002-477D-86FF-FCE6088DD1B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{388922A1-8002-477D-86FF-FCE6088DD1B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{388922A1-8002-477D-86FF-FCE6088DD1B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF45B638-ED12-45A4-8B82-92D12A2A1558}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF45B638-ED12-45A4-8B82-92D12A2A1558}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF45B638-ED12-45A4-8B82-92D12A2A1558}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF45B638-ED12-45A4-8B82-92D12A2A1558}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
