@@ -40,20 +40,25 @@ builder.Services.AddApiVersioning(options =>
 
 //JWT Auth Configuration
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtOptions"));
+
+var jwtOptions = builder.Configuration.GetSection("JwtOptions").Get<JwtOptions>();
+var tokenValidationParamerters = new TokenValidationParameters
+{
+    ValidateIssuerSigningKey = true,
+    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret)),
+    ValidateIssuer = false,
+    ValidateAudience = false,
+    RequireExpirationTime = false,
+    ValidateLifetime = true,
+};
+
+builder.Services.AddSingleton(tokenValidationParamerters);
+
 builder.Services.AddAuthentication()
     .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
     {
-        var jwtOptions = builder.Configuration.GetSection("JwtOptions").Get<JwtOptions>();
         options.SaveToken = true;
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret)),
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            RequireExpirationTime = false,
-            ValidateLifetime = true,
-        };
+        options.TokenValidationParameters = tokenValidationParamerters;
     });
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
