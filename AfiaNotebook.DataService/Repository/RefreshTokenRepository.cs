@@ -38,4 +38,23 @@ public class RefreshTokenRepository :  GenericRepository<RefreshToken>, IRefresh
             return null;
         }
     }
+
+    public async Task<bool> MarkRefreshTokenAsUsed(RefreshToken dbRefreshToken)
+    {
+        try
+        {
+            var token = await _dbSet.SingleOrDefaultAsync(x => x.Id == dbRefreshToken.Id);
+
+            if (token is null) 
+                return false;
+
+            token.IsUsed = true;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "{Repo} MarkRefreshTokenAsUsed method has generated an error", typeof(RefreshTokenRepository));
+            return null;
+        }
+    }
 }
