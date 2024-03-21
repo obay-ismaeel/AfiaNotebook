@@ -25,4 +25,17 @@ public class RefreshTokenRepository :  GenericRepository<RefreshToken>, IRefresh
             return new List<RefreshToken>();
         }
     }
+
+    public async Task<RefreshToken> GetByRefreshToken(string refreshToken)
+    {
+        try
+        {
+            return await _dbSet.AsNoTracking().FirstOrDefaultAsync(r => r.Token.ToLower() == refreshToken.ToLower());
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "{Repo} GetByRefreshToken method has generated an error", typeof(RefreshTokenRepository));
+            return null;
+        }
+    }
 }

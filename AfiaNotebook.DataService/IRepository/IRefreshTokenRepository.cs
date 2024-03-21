@@ -3,4 +3,5 @@
 namespace AfiaNotebook.DataService.IRepository;
 public interface IRefreshTokenRepository : IGenericRepository<RefreshToken>
 {
+    Task<RefreshToken> GetByRefreshToken(string refreshToken);
 }
