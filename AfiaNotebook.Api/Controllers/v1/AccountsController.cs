@@ -151,6 +151,194 @@ public class AccountsController : BaseController
         });
     }
 
+    [HttpPost("refreshToken")]
+    public async Task<IActionResult> UseRefreshToken(TokenRequestDto tokenRequestDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new UserRegisterationResponseDto
+            {
+                Success = false,
+                Errors = new List<string>()
+                {
+                    "Invalid Payload"
+                }
+            });
+        }
+
+        var result = await VerifyToken(tokenRequestDto);
+
+        if(result is null | !result!.Success)
+        {
+            return BadRequest(new UserRegisterationResponseDto
+            {
+                Success = false,
+                Errors = new List<string>()
+                {
+                    "Token validation has failed"
+                }
+            });
+        }
+
+        return Ok(result);
+    }
+
+    private async Task<AuthResult> VerifyToken(TokenRequestDto tokenRequestDto)
+    {
+        var handler = new JwtSecurityTokenHandler();
+
+        try
+        {
+            var principle = handler.ValidateToken(tokenRequestDto.JwtToken, _tokenValidationParameters, out var validatedToken);
+
+            // if the string generated is an actual jwt token
+            if(validatedToken is JwtSecurityToken jwtSecurityToken)
+            {
+                // check if the jwt token is created using the same algorithm that we used
+                var result = jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase);
+
+                if (!result) return null;
+            }
+
+            // check expiry date
+            var utcExpiryDate = long.Parse(principle.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp).Value);
+
+            var expiryDate = UnixTimeStampToDateTime(utcExpiryDate);
+
+            // check if JWT token hasn't expired
+            if(expiryDate > DateTime.UtcNow)
+            {
+                return new AuthResult
+                {
+                    Success = false,
+                    Errors = new List<string>()
+                    {
+                        "Jwt Token Has Not Expired!"
+                    }
+                };
+            }
+
+            // check if refresh token exists
+            var dbRefreshToken = await _unitOfWork.RefreshTokens.GetByRefreshToken(tokenRequestDto.RefreshToken);
+
+            if(dbRefreshToken is null)
+            {
+                return new AuthResult
+                {
+                    Success = false,
+                    Errors = new List<string>()
+                    {
+                        "Invalid Refresh Token!"
+                    }
+                };
+            }
+
+            // check refresh token expiry date
+            if(dbRefreshToken.ExpiryDate < DateTime.UtcNow)
+            {
+                return new AuthResult
+                {
+                    Success = false,
+                    Errors = new List<string>()
+                    {
+                        "Refresh Token has expired!, please login again."
+                    }
+                };
+            }
+
+            if (dbRefreshToken.IsUsed)
+            {
+                return new AuthResult
+                {
+                    Success = false,
+                    Errors = new List<string>()
+                    {
+                        "Refresh Token has been used! it can't be reused"
+                    }
+                };
+            }
+
+            if (dbRefreshToken.IsRevoked)
+            {
+                return new AuthResult
+                {
+                    Success = false,
+                    Errors = new List<string>()
+                    {
+                        "Refresh Token has been revoked! it can't be used."
+                    }
+                };
+            }
+
+            var jti = principle.Claims.SingleOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti).Value;
+            if(dbRefreshToken.JwtId != jti)
+            {
+                return new AuthResult
+                {
+                    Success = false,
+                    Errors = new List<string>()
+                    {
+                        "Refresh Token reference does not match the jwt token."
+                    }
+                };
+            }
+
+            //start processing and getting new token
+            dbRefreshToken.IsUsed = true;
+            var updateResult = await _unitOfWork.RefreshTokens.MarkRefreshTokenAsUsed(dbRefreshToken);
+            await _unitOfWork.CompleteAsync();
+
+            if (!updateResult)
+            {
+                return new AuthResult
+                {
+                    Success = false,
+                    Errors = new List<string>()
+                    {
+                        "Error processing the request."
+                    }
+                };
+            }
+
+            var dbUser = await _userManager.FindByIdAsync(dbRefreshToken.UserId);
+
+            if(dbUser is null)
+            {
+                return new AuthResult
+                {
+                    Success = false,
+                    Errors = new List<string>()
+                    {
+                        "Error processing the request."
+                    }
+                };
+            }
+
+            var tokens = await GenerateJwtAndRefreshTokens(dbUser);
+
+            return new AuthResult
+            {
+                Success = true,
+                JwtToken = tokens.JwtToken,
+                RefreshToken = tokens.RefreshToken
+            };
+        }
+        catch (Exception ex)
+        {
+            // todo error handling and logging
+            return null;
+        }
+    }
+
+    private DateTime UnixTimeStampToDateTime(long unixDate)
+    {
+        var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        dateTime = dateTime.AddSeconds(unixDate).ToUniversalTime();
+
+        return dateTime;
+    }
+
     private async Task<TokenData> GenerateJwtAndRefreshTokens(IdentityUser user)
     {
         var handler = new JwtSecurityTokenHandler();

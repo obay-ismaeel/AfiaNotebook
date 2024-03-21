@@ -54,7 +54,7 @@ public class RefreshTokenRepository :  GenericRepository<RefreshToken>, IRefresh
         catch (Exception ex)
         {
             _logger.LogError(ex, "{Repo} MarkRefreshTokenAsUsed method has generated an error", typeof(RefreshTokenRepository));
-            return null;
+            return false;
         }
     }
 }
