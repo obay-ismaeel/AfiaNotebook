@@ -8,4 +8,5 @@ using System.Threading.Tasks;
 namespace AfiaNotebook.DataService.IRepository;
 public interface IUsersRepository : IGenericRepository<User>
 {
+    Task<bool> UpdateUserProfile(User user);
 }
