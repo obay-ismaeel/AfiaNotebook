@@ -31,6 +31,21 @@ public class UsersRepository : GenericRepository<User>, IUsersRepository
         }
     }
 
+    public async Task<User> GetByIdentityId(Guid id)
+    {
+        try
+        {
+            return await _dbSet.Where(x => x.Status == 1 )
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.IdentityId == id);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "{Repo} GetByIdentityId method has generated an error", typeof(UsersRepository));
+            return null;
+        }
+    }
+
     public async Task<bool> UpdateUserProfile(User user)
     {
         try
