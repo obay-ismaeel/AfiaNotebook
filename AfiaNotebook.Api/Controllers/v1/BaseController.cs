@@ -1,5 +1,6 @@
 ﻿using AfiaNotebook.DataService.IConfiguration;
 using Asp.Versioning;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AfiaNotebook.Api.Controllers.v1;
@@ -10,9 +11,11 @@ namespace AfiaNotebook.Api.Controllers.v1;
 public class BaseController : ControllerBase
 {
     protected readonly IUnitOfWork _unitOfWork;
+    protected readonly UserManager<IdentityUser> _userManager;
 
-    public BaseController(IUnitOfWork unitOfWork)
+    public BaseController(IUnitOfWork unitOfWork, UserManager<IdentityUser> userManager)
     {
         _unitOfWork = unitOfWork;
+        _userManager = userManager;
     }
 }

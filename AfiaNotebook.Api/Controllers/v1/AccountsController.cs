@@ -17,12 +17,10 @@ namespace AfiaNotebook.Api.Controllers.v1;
 
 public class AccountsController : BaseController
 {
-    private readonly UserManager<IdentityUser> _userManager;
     private readonly JwtOptions _jwtOptions;
     private readonly TokenValidationParameters _tokenValidationParameters;
-    public AccountsController(IUnitOfWork unitOfWork, UserManager<IdentityUser> userManager, IOptionsMonitor<JwtOptions> optionsMonitor, TokenValidationParameters tokenValidationParameters) : base(unitOfWork)
+    public AccountsController(IUnitOfWork unitOfWork, UserManager<IdentityUser> userManager, IOptionsMonitor<JwtOptions> optionsMonitor, TokenValidationParameters tokenValidationParameters) : base(unitOfWork, userManager)
     {
-        _userManager = userManager;
         _jwtOptions = optionsMonitor.CurrentValue;
         _tokenValidationParameters = tokenValidationParameters;
     }
@@ -80,8 +78,11 @@ public class AccountsController : BaseController
             FirstName = registerationDto.FirstName,
             LastName = registerationDto.LastName,
             Email = registerationDto.Email,
-            PhoneNumber = "",
-            Country = "",
+            PhoneNumber = "XXXX",
+            Country = "UK",
+            MobileNumber = "XXXX", 
+            Address = "XX St.", 
+            Sex = "Non Binary",
             DateOfBirth = DateTime.Now,
             Status = 1
         };
@@ -350,6 +351,7 @@ public class AccountsController : BaseController
             Subject = new ClaimsIdentity(new []
             {
                 new Claim("Id", user.Id),
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(JwtRegisteredClaimNames.Sub, user.Email), // unique id
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // used by the refresh token
