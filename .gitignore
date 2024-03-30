@@ -482,3 +482,8 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# user defined
+/AfiaNotebook.Api/app.db
+/AfiaNotebook.Api/app.db-shm
+/AfiaNotebook.Api/app.db-wal
