@@ -1,4 +1,7 @@
 ﻿using AfiaNotebook.DataService.IConfiguration;
+using AfiaNotebook.Entities.DbSet;
+using AfiaNotebook.Entities.Dtos.Errors;
+using AfiaNotebook.Entities.Dtos.Generic;
 using AfiaNotebook.Entities.Dtos.Incoming;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -21,7 +24,8 @@ public class ProfileController : BaseController
 
         if(loggedUser == null)
         {
-            return BadRequest("User not found");
+            var result = new Result<User> { Error = new Error(400, "User not found", "Bad request") };
+            return BadRequest(result);
         }
 
         var identityId = new Guid(loggedUser.Id);
@@ -30,25 +34,29 @@ public class ProfileController : BaseController
 
         if (user == null)
         {
-            return BadRequest("User not found");
+            var result = new Result<User> { Error = new Error(400, "User not found", "Bad request") };
+            return BadRequest(result);
         }
 
-        return Ok(user);
+        var successResult = new Result<User> { Content = user };
+        return Ok(successResult);
     }
 
-    [HttpPut]
+    [HttpPut]   
     public async Task<IActionResult> UpdateProfile(ProfileDto profileDto)
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest("Invalid Payload");
+            var result = new Result<User> { Error = new Error(400, "Invalid Payload", "Bad request") };
+            return BadRequest(result);
         }
 
         var loggedUser = await _userManager.GetUserAsync(HttpContext.User);
 
         if (loggedUser == null)
         {
-            return BadRequest("User not found");
+            var result = new Result<User> { Error = new Error(400, "User not found", "Bad request") };
+            return BadRequest(result);
         }
 
         var identityId = new Guid(loggedUser.Id);
@@ -57,7 +65,8 @@ public class ProfileController : BaseController
 
         if (user == null)
         {
-            return BadRequest("User not found");
+            var result = new Result<User> { Error = new Error(400, "User not found", "Bad request") };
+            return BadRequest(result);
         }
 
         user.Address = profileDto.Address;
@@ -69,11 +78,13 @@ public class ProfileController : BaseController
 
         if (!isUpdated)
         {
-            return BadRequest("Something went wrong");
+            var result = new Result<User> { Error = new Error(500, "Something went wrong", "Server Error") };
+            return StatusCode(500,result);
         }
 
         await _unitOfWork.CompleteAsync();
 
-        return NoContent();
+        var successResult = new Result<User> { Content = user };
+        return Ok(successResult);
     }
 }

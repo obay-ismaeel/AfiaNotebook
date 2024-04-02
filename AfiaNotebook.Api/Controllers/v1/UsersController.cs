@@ -1,5 +1,7 @@
 ﻿using AfiaNotebook.DataService.IConfiguration;
 using AfiaNotebook.Entities.DbSet;
+using AfiaNotebook.Entities.Dtos.Errors;
+using AfiaNotebook.Entities.Dtos.Generic;
 using AfiaNotebook.Entities.Dtos.Incoming;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -18,7 +20,12 @@ public class UsersController : BaseController
     public async Task<IActionResult> GetUsers()
     {
         var users = await _unitOfWork.Users.GetAll();
-        return Ok(users);
+        var successResult = new PageResult<User> 
+        { 
+            Content = users.ToList(), 
+            ResultCount = users.Count() 
+        };
+        return Ok(successResult);
     }
 
     [HttpPost]
@@ -46,8 +53,12 @@ public class UsersController : BaseController
         var user = await _unitOfWork.Users.GetById(id);
 
         if (user is null)
-            return NotFound();
+        {
+            var result = new Result<User> { Error = new Error(404, "Not found", "No such user") };
+            return NotFound(result);
+        }
 
-        return Ok(user);
+        var successResult = new Result<User> { Content = user };
+        return Ok(successResult);
     }
 }
