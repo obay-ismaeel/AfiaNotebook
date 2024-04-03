@@ -2,18 +2,21 @@
 using AfiaNotebook.Entities.DbSet;
 using AfiaNotebook.Entities.Dtos.Errors;
 using AfiaNotebook.Entities.Dtos.Generic;
-using AfiaNotebook.Entities.Dtos.Incoming;
+using AfiaNotebook.Entities.Dtos;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using AfiaNotebook.Entities.Dtos.Incoming;
+using AfiaNotebook.Entities.Dtos.Outgoing;
 
 namespace AfiaNotebook.Api.Controllers.v1;
 
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class ProfileController : BaseController
 {
-    public ProfileController(IUnitOfWork unitOfWork, UserManager<IdentityUser> userManager) : base(unitOfWork, userManager)
+    public ProfileController(IUnitOfWork unitOfWork, UserManager<IdentityUser> userManager, IMapper mapper) : base(unitOfWork, userManager, mapper)
     {
     }
 
@@ -38,12 +41,14 @@ public class ProfileController : BaseController
             return BadRequest(result);
         }
 
-        var successResult = new Result<User> { Content = user };
+        var profile = _mapper.Map<ProfileDto>(user);
+
+        var successResult = new Result<ProfileDto> { Content = profile };
         return Ok(successResult);
     }
 
     [HttpPut]   
-    public async Task<IActionResult> UpdateProfile(ProfileDto profileDto)
+    public async Task<IActionResult> UpdateProfile(ProfileUpdateDto profileDto)
     {
         if (!ModelState.IsValid)
         {
@@ -84,7 +89,10 @@ public class ProfileController : BaseController
 
         await _unitOfWork.CompleteAsync();
 
-        var successResult = new Result<User> { Content = user };
+        var profile = _mapper.Map<ProfileDto>(user);
+
+        var successResult = new Result<ProfileDto> { Content = profile };
+
         return Ok(successResult);
     }
 }

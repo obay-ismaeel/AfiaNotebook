@@ -3,6 +3,7 @@ using AfiaNotebook.Entities.DbSet;
 using AfiaNotebook.Entities.Dtos.Errors;
 using AfiaNotebook.Entities.Dtos.Generic;
 using AfiaNotebook.Entities.Dtos.Incoming;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -12,7 +13,7 @@ namespace AfiaNotebook.Api.Controllers.v1;
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class UsersController : BaseController
 {
-    public UsersController(IUnitOfWork unitOfWork, UserManager<IdentityUser> userManager) : base(unitOfWork, userManager)
+    public UsersController(IUnitOfWork unitOfWork, UserManager<IdentityUser> userManager, IMapper mapper) : base(unitOfWork, userManager, mapper)
     {
     }
 
@@ -31,20 +32,12 @@ public class UsersController : BaseController
     [HttpPost]
     public async Task<IActionResult> AddUser(UserDto user)
     {
-        var _user = new User()
-        {
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            Email = user.Email,
-            PhoneNumber = user.PhoneNumber,
-            Country = user.Country,
-            DateOfBirth = Convert.ToDateTime(user.DateOfBirth),
-            Status = 1
-        };
+        var _user = _mapper.Map<User>(user);
         await _unitOfWork.Users.Add(_user);
         await _unitOfWork.CompleteAsync();
 
-        return CreatedAtAction(nameof(GetUser), new { id = _user.Id }, user);
+        var result = new Result<User> { Content = _user };
+        return CreatedAtAction(nameof(GetUser), new { id = _user.Id }, user );
     }
 
     [HttpGet("{id}")]

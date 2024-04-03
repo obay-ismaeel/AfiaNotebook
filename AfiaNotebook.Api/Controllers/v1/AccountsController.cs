@@ -4,6 +4,7 @@ using AfiaNotebook.Authentication.Models.Dtos.Incoming;
 using AfiaNotebook.Authentication.Models.Dtos.Outgoing;
 using AfiaNotebook.DataService.IConfiguration;
 using AfiaNotebook.Entities.DbSet;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -19,7 +20,7 @@ public class AccountsController : BaseController
 {
     private readonly JwtOptions _jwtOptions;
     private readonly TokenValidationParameters _tokenValidationParameters;
-    public AccountsController(IUnitOfWork unitOfWork, UserManager<IdentityUser> userManager, IOptionsMonitor<JwtOptions> optionsMonitor, TokenValidationParameters tokenValidationParameters) : base(unitOfWork, userManager)
+    public AccountsController(IUnitOfWork unitOfWork, UserManager<IdentityUser> userManager, IOptionsMonitor<JwtOptions> optionsMonitor, TokenValidationParameters tokenValidationParameters, IMapper mapper) : base(unitOfWork, userManager, mapper)
     {
         _jwtOptions = optionsMonitor.CurrentValue;
         _tokenValidationParameters = tokenValidationParameters;
