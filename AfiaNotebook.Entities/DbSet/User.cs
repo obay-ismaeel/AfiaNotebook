@@ -11,4 +11,5 @@ public class User : BaseEntity
     public string Address {  get; set; }
     public string MobileNumber { get; set; }
     public string Sex { get; set; }
+    public HealthRecord HealthRecord { get; set; }
 }
