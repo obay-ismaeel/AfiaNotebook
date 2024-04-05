@@ -14,7 +14,7 @@ public class UnitOfWork : IUnitOfWork, IDisposable
     private readonly AppDbContext _context;
     private readonly ILogger _logger;
     public IUsersRepository Users {get; private set;}
-
+    public IHealthRecordRepository HealthRecords { get; private set;}
     public IRefreshTokenRepository RefreshTokens { get; private set; }
 
     public UnitOfWork(AppDbContext context, ILoggerFactory loggerFactory)
@@ -23,6 +23,7 @@ public class UnitOfWork : IUnitOfWork, IDisposable
         _logger = loggerFactory.CreateLogger("db_logs");
         Users = new UsersRepository(_context, _logger);
         RefreshTokens = new RefreshTokenRepository(_context, _logger);
+        HealthRecords = new HealthRecordRepository(_context, _logger);
     }
 
     public async Task CompleteAsync()
